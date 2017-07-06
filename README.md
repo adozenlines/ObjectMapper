@@ -16,6 +16,7 @@ ObjectMapper is a framework written in Swift that makes it easy for you to conve
 - [Mapping Context](#mapping-context)
 - [ObjectMapper + Alamofire](#objectmapper--alamofire) 
 - [ObjectMapper + Realm](#objectmapper--realm)
+- [Projects using ObjectMapper](#projects-using-objectmapper)
 - [To Do](#to-do)
 - [Contributing](#contributing)
 - [Installation](#installation)
@@ -41,8 +42,8 @@ class User: Mappable {
     var username: String?
     var age: Int?
     var weight: Double!
-    var array: [AnyObject]?
-    var dictionary: [String : AnyObject] = [:]
+    var array: [Any]?
+    var dictionary: [String : Any] = [:]
     var bestFriend: User?                       // Nested User object
     var friends: [User]?                        // Array of Users
     var birthday: Date?
@@ -106,8 +107,8 @@ ObjectMapper can map classes composed of the following types:
 - `Float`
 - `String`
 - `RawRepresentable` (Enums)
-- `Array<AnyObject>`
-- `Dictionary<String, AnyObject>`
+- `Array<Any>`
+- `Dictionary<String, Any>`
 - `Object<T: Mappable>`
 - `Array<T: Mappable>`
 - `Array<Array<T: Mappable>>`
@@ -127,7 +128,7 @@ This failable initializer is used by ObjectMapper for object creation. It can be
 ```swift
 required init?(map: Map){
 	// check if a required "name" property exists within the JSON.
-	if map.JSONDictionary["name"] == nil {
+	if map.JSON["name"] == nil {
 		return nil
 	}
 }
@@ -142,7 +143,8 @@ Note: `StaticMappable`, like `Mappable`, is a sub protocol of `BaseMappable` whi
 ObjectMapper uses this function to get objects to use for mapping. Developers should return an instance of an object that conforms to `BaseMappable` in this function. This function can also be used to:
 - validate JSON prior to object serialization
 - provide an existing cached object to be used for mapping
-- return an object of another type (which also conforms to BaseMappable) to be used for mapping. For instance, you may inspect the JSON to infer the type of object that should be used for mapping ([see example](https://github.com/Hearst-DD/ObjectMapper/blob/master/ObjectMapperTests/ClassClusterTests.swift#L62))
+- return an object of another type (which also conforms to BaseMappable) to be used for mapping. For instance, you may inspect the JSON to infer the type of object that should be used for mapping ([see examples in ClassClusterTests.swift](https://github.com/Hearst-DD/ObjectMapper/blob/master/Tests/ObjectMapperTests/ClassClusterTests.swift#L67))
+
 
 If you need to implemented ObjectMapper in an extension, you will need to select this protocol instead of `Mappable`. 
 
@@ -419,12 +421,12 @@ let context = Context()
 let user = Mapper<User>(context: context).map(JSONString)
 ```
 
-#ObjectMapper + Alamofire
+# ObjectMapper + Alamofire
 
 If you are using [Alamofire](https://github.com/Alamofire/Alamofire) for networking and you want to convert your responses to Swift objects, you can use [AlamofireObjectMapper](https://github.com/tristanhimmelman/AlamofireObjectMapper). It is a simple Alamofire extension that uses ObjectMapper to automatically map JSON response data to Swift objects.
 
 
-#ObjectMapper + Realm
+# ObjectMapper + Realm
 
 ObjectMapper and Realm can be used together. Simply follow the class structure below and you will be able to use ObjectMapper to generate your Realm models:
 
@@ -445,6 +447,11 @@ class Model: Object, Mappable {
 If you want to serialize associated RealmObjects, you can use [ObjectMapper+Realm](https://github.com/jakenberg/ObjectMapper-Realm). It is a simple Realm extension that serializes arbitrary JSON into Realm's List class.
 
 Note: Generating a JSON string of a Realm Object using ObjectMappers' `toJSON` function only works within a Realm write transaction. This is caused because ObjectMapper uses the `inout` flag in its mapping functions (`<-`) which are used both for serializing and deserializing. Realm detects the flag and forces the `toJSON` function to be called within a write block even though the objects are not being modified.
+
+# Projects Using ObjectMapper
+- [Xcode Plugin for generating `Mappable` and `ImmutableMappable` code](https://github.com/liyanhuadev/ObjectMapper-Plugin)
+
+If you have a project that utilizes, extends or provides tooling for ObjectMapper, please submit a PR with a link to your project in this section of the README.
 
 # To Do
 - Improve error handling. Perhaps using `throws`
